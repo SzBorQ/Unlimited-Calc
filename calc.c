@@ -17,6 +17,10 @@ char saveValue(int x){
 
 char *saveDec(int x){
     char *result = malloc(3 * sizeof(char));
+    if(result == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
     if (x < 10){
         result[0] = '0' + x;
         result[1] = '\0';
@@ -30,7 +34,7 @@ char *saveDec(int x){
 }
 
 
-void removeZero(char *a){
+void removeZero(char *a){ //usuwanie wiodacych zer
     while(a[0] == '0' && a[1] != '\0'){
         memmove(a,a+1,strlen(a));
     }
@@ -44,10 +48,16 @@ char *addition(char *a, char *b, int base){
 
     int curV, vA, vB; // tymczasowo na sumę
     int carry = 0;
-    int i = 0;
-    char *wynik = malloc((lenA > lenB ? (lenA + 2) : (lenB + 2)) * sizeof(char));
+    int i = 0, j = 0;
+    char temp;
+    char *wynik = malloc((lenA > lenB ? (lenA + 2) * sizeof(char) : (lenB + 2)) * sizeof(char));
+    if(wynik == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
+   
 
-    while( (lenA >= 0) || (lenB >= 0) || carry){
+    while( (lenA >= 0) || (lenB >= 0) || carry){ //dodawanie algorytmem dodawania pisemnego
 
         vA = (lenA >= 0) ? getValue(a[lenA]) : 0; 
         vB = (lenB >= 0) ? getValue(b[lenB]) : 0;
@@ -55,7 +65,6 @@ char *addition(char *a, char *b, int base){
         carry = curV / base;
         curV = curV % base;
         wynik[i] = saveValue(curV);
-
         
         lenA--;
         lenB--;
@@ -64,11 +73,14 @@ char *addition(char *a, char *b, int base){
     }
     wynik[i] = '\0';
 
-    for (int j = 0; j < (i / 2); j++) {
-        char temp = wynik[j];
+    
+
+    for (j = 0; j < (i / 2); j++) { //"odwrócenie" wyniku
+        temp = wynik[j];
         wynik[j] = wynik[i - 1 - j];
         wynik[i - 1 - j] = temp;
     }
+
 
     return wynik;
        
@@ -88,12 +100,17 @@ char *subtraction(char *a, char *b, int base){
     int i = lenA - 1;
     int j = lenB - 1;
     int k = lenA;
+    int dA, dB;
     
     char *wynik = malloc((lenA > lenB ? (lenA + 2) : (lenB + 2)) * sizeof(char));
+    if(wynik == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
     wynik[k] = '\0';
     while(i >= 0){
-        int dA = getValue(a[i]);
-        int dB = (j >= 0) ? getValue(b[j]) : 0;
+        dA = getValue(a[i]);
+        dB = (j >= 0) ? getValue(b[j]) : 0;
         
         //printf("%i %i\n", dA, dB);
         curV = dA - dB - carry;
@@ -116,51 +133,28 @@ char *subtraction(char *a, char *b, int base){
     return wynik;
 }
 
-char *multByDigit(char *a, int dig, int base){
-    int lenA = strlen(a) - 1;
-    char *wynik = malloc((lenA + 1) * sizeof(char));
-
-    int carry = 0;
-    int curV = 0;
-    int k = 0;
-    int i = lenA;
-    int curD;
-    while((i >= 0) || carry){
-        curD = (i >= 0) ? getValue(a[i]) : 0;
-        curV = dig * curD + carry;
-        wynik[k] = saveValue(curV % base);
-        carry = curV / base;
-        i--;
-        k++;
-    }
-    wynik[k] = '\0';
-    
-    for (int j = 0; j < (k / 2); j++) {
-        char temp = wynik[j];
-        wynik[j] = wynik[k - 1 - j];
-        wynik[k - 1 - j] = temp;
-    }
-    
-    return wynik;
-    
-}
 
 char *multiplication(char *a, char *b, int base){
     int lenA = strlen(a) - 1;
     int lenB = strlen(b) - 1;
     int lenW = lenA + lenB + 2;
     int *intWynik = calloc(lenW, sizeof(int));
+    if(intWynik == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
 
     int curV = 0;
     int dA, dB;
+    int i, j, pos;
 
-    for (int i = lenA; i >= 0; i--){
+    for (i = lenA; i >= 0; i--){ // mnożenie algorytmem pisemnym
         dA = getValue(a[i]);
-        for(int j = lenB; j >= 0; j--){
+        for(j = lenB; j >= 0; j--){
             dB = getValue(b[j]);
             curV = dA * dB;
 
-            int pos = i + j + 1;
+            pos = i + j + 1;
             intWynik[pos] += curV;
             
             while (intWynik[pos] >= base) {
@@ -172,40 +166,62 @@ char *multiplication(char *a, char *b, int base){
     }
 
     char *wynik = malloc((lenA + lenB + 3) * sizeof(char));
+    if(wynik == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
     int index = 0;
     int start = 0;
 
     while(start < lenW && intWynik[start] == 0) start++;
 
-    for(int i = start; i < lenW; i++) wynik[index++] = saveValue(intWynik[i]);
+    for(i = start; i < lenW; i++) wynik[index++] = saveValue(intWynik[i]); // zmiana na tablice znakow
     wynik[index] = '\0';
     free(intWynik);
  
     return wynik;
 }
 
-char *str_duplicate(char *a){
+char *str_duplicate(char *a){ 
     char *dupli = malloc(strlen(a)+1);
+    if(dupli == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
     if (dupli) strcpy(dupli, a);
     return dupli;
 }
 
 char *division(char* a, char *b, int base){
-    if(comparsion(a,b) < 0){
+    if(comparsion(a,b) < 0){ // jeśli b > a to wynik 0
         char *result = malloc(2 * sizeof(char));
+        if(result == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
         result[0] = '0';
         result[1] = '\0';
         return result;
     }
     int lenA = strlen(a);
     char *result = malloc((lenA + 1) * sizeof(char));
+    if(result == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
     char *remainder = malloc((lenA + 1) * sizeof(char));
+    if(remainder == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
     
     remainder[0] = '\0';
     int resultIndex = 0;
-    int q;
-    for(int i = 0; i < lenA; i++){
-        int len = strlen(remainder);
+    int q, i, len;
+    char *temp;
+
+    for(i = 0; i < lenA; i++){ // dzielenie algorytmem dzielenia pisemnego
+        len = strlen(remainder);
         remainder[len] = a[i];
         remainder[len + 1] = '\0';
         //printf("check\n");
@@ -213,7 +229,7 @@ char *division(char* a, char *b, int base){
         removeZero(remainder);
         //printf("r %s\n", remainder);
         while(comparsion(remainder,b) >= 0){
-            char *temp = subtraction(remainder,b,base);
+            temp = subtraction(remainder,b,base);
             strcpy(remainder,temp);
             free(temp);
             q++;
@@ -234,28 +250,42 @@ char *modulo(char *a, char *b, int base){
 
 char *systemChange(char *a, int bIn, int bOut) {
     char *base10 = malloc(2 * sizeof(char));
+    if(base10 == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
     strcpy(base10, "0");
 
     char *baseIn = saveDec(bIn);
     char *baseOut = saveDec(bOut);
 
 
-    //printf("%s %s\n", baseIn, baseOut);
-
     char *multiplier = malloc(2 * sizeof(char));
+    if(multiplier == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
     strcpy(multiplier, "1");
 
     char *digit = malloc(3 * sizeof(char));
-    int digitValue;
+    if(digit == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
+    int digitValue, i;
+
+    char *newBase10;
+    char *temp;
+    char *newMultiplier;
 
     int lenA = strlen(a);
-    for(int i = lenA - 1; i >= 0; i--){
+    for(i = lenA - 1; i >= 0; i--){ //obliczanie wartosci dziesietnej liczby
         digitValue = getValue(a[i]);
         digit = saveDec(digitValue);
 
         //printf("%s\n", digit);
-        char *temp = multiplication(multiplier, digit, 10);
-        char *newBase10 = addition(base10, temp, 10);
+        temp = multiplication(multiplier, digit, 10);
+        newBase10 = addition(base10, temp, 10);
 
         //printf("Cyfra z wagą %s\n", temp);
         //printf("Nowa dec %s\n", newBase10);
@@ -263,14 +293,14 @@ char *systemChange(char *a, int bIn, int bOut) {
         free(base10);
         base10 = newBase10;
 
-        char *newMultiplier = multiplication(multiplier, baseIn, 10);
+        newMultiplier = multiplication(multiplier, baseIn, 10);
         //printf("nowa waga %s\n", newMultiplier);
         free(multiplier);
         multiplier = newMultiplier;
     }
 
-    //printf("%s\n", base10);
-    if (bOut == 10){
+    
+    if (bOut == 10){ // jesli do dziesietnej to koniec
         free(baseIn);
         free(baseOut);
         free(multiplier);
@@ -278,30 +308,40 @@ char *systemChange(char *a, int bIn, int bOut) {
     } 
 
     char *result = malloc((4 * lenA+ 1) * sizeof(char));
+    if(result == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
 
     int resultIndex = 0;
+    char *remainder;
+    
     char *zero = malloc(2 * sizeof(char));
+    if(zero == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
     strcpy(zero, "0");
-    //printf("%s\n", baseOut);
-    while(comparsion(base10, zero) > 0){
-        char *remainder = modulo(base10, baseOut, 10);
-        //printf("r%s", remainder);
+  
+    while(comparsion(base10, zero) > 0){ //zmiana liczby z dziesietnej na system zadany
+        remainder = modulo(base10, baseOut, 10);
+       
         result[resultIndex] = saveValue(atoi(remainder));
         resultIndex++;
-        char *newBase10 = division(base10,baseOut,10);
-        //printf("%s\n", base10);
+        newBase10 = division(base10,baseOut,10);
+   
         free(base10);
         base10 = newBase10;
         free(remainder);
     }
 
     result[resultIndex] = '\0';
-    char temp;
+    char temporary;
 
-    for(int i = 0; i < resultIndex / 2; i++){
-        temp = result[i];
+    for(i = 0; i < resultIndex / 2; i++){ // odwrocenie wyniku
+        temporary = result[i];
         result[i] = result[resultIndex - 1 - i];
-        result[resultIndex - 1 - i] = temp; 
+        result[resultIndex - 1 - i] = temporary; 
     }
 
     free(base10);
@@ -314,9 +354,14 @@ char *systemChange(char *a, int bIn, int bOut) {
 }
 
 char *power(char *base, char *exponent, int systemBase) {
+    char *result = malloc(2 * sizeof(char));
+    if(result == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
     
+
     if (strcmp(exponent, "0") == 0) {
-        char *result = malloc(2 * sizeof(char));
         strcpy(result, "1");
         return result;
     }
@@ -326,20 +371,30 @@ char *power(char *base, char *exponent, int systemBase) {
         return str_duplicate(base);
     }
 
-    char *result = malloc(2 * sizeof(char));
+    
+    
     strcpy(result, "1");
 
     char *currentBase = str_duplicate(base);
-    char *binExponent = systemChange(exponent, systemBase, 2);
+    char *binExponent = systemChange(exponent, systemBase, 2); //wykladnik na dwojkowy
 
     char *zero = malloc(2 * sizeof(char));
+    if(zero == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
     strcpy(zero, "0");
 
     char *two = malloc(2 * sizeof(char));
+    if(two == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
     strcpy(two, "2");
 
     int lenExp = strlen(binExponent) - 1;
-    for(int i = lenExp; i >= 0; i--){
+
+    for(int i = lenExp; i >= 0; i--){ //algorytm szybkiego potegowania
         if(binExponent[i] == '1'){
             char *newResult = multiplication(result, currentBase, systemBase);
             free(result);

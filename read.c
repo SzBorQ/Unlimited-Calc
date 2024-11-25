@@ -4,9 +4,9 @@
 #include <ctype.h>
 #include "calc.h"
 
-#define MAX_L 1024
+#define MAX_L 16384
 
-
+//spradzenie poprawności argumentu
 int checkBase(char *a, int base){ 
     char z;
     int i;
@@ -18,6 +18,8 @@ int checkBase(char *a, int base){
     return 1;
 }
 
+
+//funkcje do sprawdzania poprawności nagłówka
 int checkSystem(char *arg){
     int l;
     if(!isdigit(arg[0])) return 0;
@@ -40,33 +42,67 @@ void processFile(FILE *in, FILE *out){
     int sOut;
     char operation;
 
-    int opFlag = -1;
+    int opFlag = -1; //flaga operacji
     int argLen = 0;
     int emptyCounter = 0;
 
     char *arg1 = malloc(3 * sizeof(char));
-    char *arg2 = malloc(3 * sizeof(char));
+    if(arg1 == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
 
-    char *line = malloc(MAX_L *sizeof(char));
-    char *argument = malloc(MAX_L *sizeof(char));
-    char *result, *newResult;
+    if(!arg1){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
+
+    char *arg2 = malloc(3 * sizeof(char));
+    if(arg2 == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
+
+    if(!arg2){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
+
+    char *line = malloc(MAX_L * sizeof(char));
+    if(line == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
+    char *argument = malloc(MAX_L * sizeof(char));
+    if(argument == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
+    char *result = malloc(2 * sizeof(char));
+    if(result == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
+    char *newResult;
     result = NULL;
     newResult = NULL;
 
     while (fgets(line, MAX_L, in) != NULL){
         argLen = strlen(line);
-        if(argLen <= 1){
+
+        if(argLen <= 1){    // gdy linia jest pusta
             emptyCounter += 1;
-            if(emptyCounter == 3 && result != NULL){
+            if(emptyCounter == 3 && result != NULL){    // po trzech pustych koniec działania
                 fprintf(out, "\nWynik = %s\n\n", result);
+                //free(result);
                 result = NULL;
             }
             continue;
         }
         emptyCounter = 0;
 
-        if(sscanf(line, "%s %s", arg1, arg2) == 2){
-            if(result != NULL){
+        if(sscanf(line, "%s %s", arg1, arg2) == 2){ // odczyt naglowka
+            if(result != NULL){ // jeżeli cos policzylismy to wypisujemy wynik
                 fprintf(out, "\nWynik = %s\n\n", result);
                 free(result);
                 result = NULL;
@@ -102,10 +138,15 @@ void processFile(FILE *in, FILE *out){
                 fprintf(out,"'%s' nie jest liczba w systemie %i\n", argument, sOut);
                 continue;
             }
+            
             removeZero(argument);
             fprintf(out, "%s\n", argument);
             if(result == NULL){
-                result = malloc((strlen(argument) + 1) * sizeof(char));
+                result = realloc(result, (strlen(argument) + 1) * sizeof(char));
+                if(result == NULL){
+                fprintf(stderr, "Blad alokacji pamieci");
+                exit(EXIT_FAILURE);
+                }
                 strcpy(result,argument);
                 continue;
             }
@@ -137,6 +178,7 @@ void processFile(FILE *in, FILE *out){
             
             free(result);
             result = newResult;
+            
         }
         
         
@@ -154,8 +196,14 @@ void processFile(FILE *in, FILE *out){
         }
     }
 }
-char *createOutName(char *in){
+
+
+char *createOutName(char *in){ //tworzenie nazwy pliku wyjsciowego
     char *result = malloc(strlen(in) + 6);
+    if(result == NULL){
+        fprintf(stderr, "Blad alokacji pamieci");
+        exit(EXIT_FAILURE);
+    }
     strcpy(result, "out_");
     strcat(result, in);
     return result;
