@@ -34,7 +34,7 @@ char *saveDec(int x){
 }
 
 
-void removeZero(char *a){ //usuwanie wiodacych zer
+void removeZero(char *a){ /*usuwanie wiodacych zer*/
     while(a[0] == '0' && a[1] != '\0'){
         memmove(a,a+1,strlen(a));
     }
@@ -42,11 +42,11 @@ void removeZero(char *a){ //usuwanie wiodacych zer
 
 char *addition(char *a, char *b, int base){
     
-    //ostatnia cyfra dodawanych liczb
+    /*ostatnia cyfra dodawanych liczb*/
     int lenA = strlen(a) - 1;
     int lenB = strlen(b) - 1;
 
-    int curV, vA, vB; // tymczasowo na sumę
+    int curV, vA, vB; /*tymczasowo na sumę*/
     int carry = 0;
     int i = 0, j = 0;
     char temp;
@@ -57,7 +57,7 @@ char *addition(char *a, char *b, int base){
     }
    
 
-    while( (lenA >= 0) || (lenB >= 0) || carry){ //dodawanie algorytmem dodawania pisemnego
+    while( (lenA >= 0) || (lenB >= 0) || carry){ /*dodawanie algorytmem dodawania pisemnego*/
 
         vA = (lenA >= 0) ? getValue(a[lenA]) : 0; 
         vB = (lenB >= 0) ? getValue(b[lenB]) : 0;
@@ -75,7 +75,7 @@ char *addition(char *a, char *b, int base){
 
     
 
-    for (j = 0; j < (i / 2); j++) { //"odwrócenie" wyniku
+    for (j = 0; j < (i / 2); j++) { /*"odwrócenie" wyniku*/
         temp = wynik[j];
         wynik[j] = wynik[i - 1 - j];
         wynik[i - 1 - j] = temp;
@@ -112,9 +112,8 @@ char *subtraction(char *a, char *b, int base){
         dA = getValue(a[i]);
         dB = (j >= 0) ? getValue(b[j]) : 0;
         
-        //printf("%i %i\n", dA, dB);
         curV = dA - dB - carry;
-        //printf("%i\n", curV);
+ 
         if(curV < 0){
             curV += base;
             carry = 1;
@@ -124,11 +123,11 @@ char *subtraction(char *a, char *b, int base){
         }
 
         wynik[--k] = saveValue(curV);
-        //printf("%c\n", wynik[k]);
+  
         i--;
         j--;
     }
-    //printf("%s\n", wynik);
+
     removeZero(wynik);
     return wynik;
 }
@@ -148,7 +147,7 @@ char *multiplication(char *a, char *b, int base){
     int dA, dB;
     int i, j, pos;
 
-    for (i = lenA; i >= 0; i--){ // mnożenie algorytmem pisemnym
+    for (i = lenA; i >= 0; i--){ /*mnożenie algorytmem pisemnym*/
         dA = getValue(a[i]);
         for(j = lenB; j >= 0; j--){
             dB = getValue(b[j]);
@@ -175,7 +174,7 @@ char *multiplication(char *a, char *b, int base){
 
     while(start < lenW && intWynik[start] == 0) start++;
 
-    for(i = start; i < lenW; i++) wynik[index++] = saveValue(intWynik[i]); // zmiana na tablice znakow
+    for(i = start; i < lenW; i++) wynik[index++] = saveValue(intWynik[i]); /*zmiana na tablice znakow*/
     wynik[index] = '\0';
     free(intWynik);
  
@@ -193,7 +192,7 @@ char *str_duplicate(char *a){
 }
 
 char *division(char* a, char *b, int base){
-    if(comparsion(a,b) < 0){ // jeśli b > a to wynik 0
+    if(comparsion(a,b) < 0){ /*jeśli b > a to wynik 0*/
         char *result = malloc(2 * sizeof(char));
         if(result == NULL){
         fprintf(stderr, "Blad alokacji pamieci");
@@ -220,14 +219,14 @@ char *division(char* a, char *b, int base){
     int q, i, len;
     char *temp;
 
-    for(i = 0; i < lenA; i++){ // dzielenie algorytmem dzielenia pisemnego
+    for(i = 0; i < lenA; i++){ /*dzielenie algorytmem dzielenia pisemnego*/
         len = strlen(remainder);
         remainder[len] = a[i];
         remainder[len + 1] = '\0';
-        //printf("check\n");
+  
         q = 0;
         removeZero(remainder);
-        //printf("r %s\n", remainder);
+ 
         while(comparsion(remainder,b) >= 0){
             temp = subtraction(remainder,b,base);
             strcpy(remainder,temp);
@@ -284,28 +283,26 @@ char *systemChange(char *a, int bIn, int bOut) {
     char *newMultiplier;
 
     int lenA = strlen(a);
-    for(i = lenA - 1; i >= 0; i--){ //obliczanie wartosci dziesietnej liczby
+    for(i = lenA - 1; i >= 0; i--){ /*obliczanie wartosci dziesietnej liczby*/
         digitValue = getValue(a[i]);
         digit = saveDec(digitValue);
 
-        //printf("%s\n", digit);
+    
         temp = multiplication(multiplier, digit, 10);
         newBase10 = addition(base10, temp, 10);
 
-        //printf("Cyfra z wagą %s\n", temp);
-        //printf("Nowa dec %s\n", newBase10);
 
         free(base10);
         base10 = newBase10;
 
         newMultiplier = multiplication(multiplier, baseIn, 10);
-        //printf("nowa waga %s\n", newMultiplier);
+
         free(multiplier);
         multiplier = newMultiplier;
     }
 
     
-    if (bOut == 10){ // jesli do dziesietnej to koniec
+    if (bOut == 10){ /*jesli do dziesietnej to koniec*/
         free(baseIn);
         free(baseOut);
         free(multiplier);
@@ -328,7 +325,7 @@ char *systemChange(char *a, int bIn, int bOut) {
     }
     strcpy(zero, "0");
   
-    while(comparsion(base10, zero) > 0){ //zmiana liczby z dziesietnej na system zadany
+    while(comparsion(base10, zero) > 0){ /*zmiana liczby z dziesietnej na system zadany*/
         remainder = modulo(base10, baseOut, 10);
        
         result[resultIndex] = saveValue(atoi(remainder));
@@ -343,7 +340,7 @@ char *systemChange(char *a, int bIn, int bOut) {
     result[resultIndex] = '\0';
     char temporary;
 
-    for(i = 0; i < resultIndex / 2; i++){ // odwrocenie wyniku
+    for(i = 0; i < resultIndex / 2; i++){ /*odwrocenie wyniku*/
         temporary = result[i];
         result[i] = result[resultIndex - 1 - i];
         result[resultIndex - 1 - i] = temporary; 
@@ -382,7 +379,7 @@ char *power(char *base, char *exponent, int systemBase) {
     strcpy(result, "1");
 
     char *currentBase = str_duplicate(base);
-    char *binExponent = systemChange(exponent, systemBase, 2); //wykladnik na dwojkowy
+    char *binExponent = systemChange(exponent, systemBase, 2); /*wykladnik na dwojkowy*/
 
     char *zero = malloc(2 * sizeof(char));
     if(zero == NULL){
@@ -399,8 +396,9 @@ char *power(char *base, char *exponent, int systemBase) {
     strcpy(two, "2");
 
     int lenExp = strlen(binExponent) - 1;
+    int i;
 
-    for(int i = lenExp; i >= 0; i--){ //algorytm szybkiego potegowania
+    for(i = lenExp; i >= 0; i--){ /*algorytm szybkiego potegowania*/
         if(binExponent[i] == '1'){
             char *newResult = multiplication(result, currentBase, systemBase);
             free(result);

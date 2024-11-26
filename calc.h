@@ -19,4 +19,4 @@ char *systemChange(char *a, int bIn, int bOut);
 
 char *power(char *base, char *exponent, int systemBase);
 
-#endif //CALC_H
+#endif /*CALC_H*/

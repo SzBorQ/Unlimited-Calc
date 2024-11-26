@@ -6,7 +6,7 @@
 
 #define MAX_L 16384
 
-//spradzenie poprawności argumentu
+/*spradzenie poprawności argumentu*/
 int checkBase(char *a, int base){ 
     char z;
     int i;
@@ -19,7 +19,7 @@ int checkBase(char *a, int base){
 }
 
 
-//funkcje do sprawdzania poprawności nagłówka
+/*funkcje do sprawdzania poprawności nagłówka*/
 int checkSystem(char *arg){
     int l;
     if(!isdigit(arg[0])) return 0;
@@ -41,7 +41,7 @@ void processFile(FILE *in, FILE *out){
     int sIn;
     int sOut;
     char operation;
-    int opFlag = -1; //flaga operacji
+    int opFlag = -1; /*flaga operacji*/
     int argLen = 0;
     int emptyCounter = 0;
 
@@ -89,11 +89,10 @@ void processFile(FILE *in, FILE *out){
     while (fgets(line, MAX_L, in) != NULL){
         argLen = strlen(line);
         
-        if(argLen <= 1){    // gdy linia jest pusta
+        if(argLen <= 1){    /*gdy linia jest pusta*/
             emptyCounter += 1;
-            if(emptyCounter == 3 && result != NULL){    // po trzech pustych koniec działania
+            if(emptyCounter == 3 && result != NULL){    /*po trzech pustych koniec działania*/
                 fprintf(out, "\nWynik = %s\n\n", result);
-                printf("%s\n", result);
                 free(result);
                 result = malloc(2 *sizeof(char));
                 result = NULL;
@@ -102,8 +101,8 @@ void processFile(FILE *in, FILE *out){
         }
         emptyCounter = 0;
 
-        if(sscanf(line, "%s %s", arg1, arg2) == 2){ // odczyt naglowka
-            if(result != NULL){ // jeżeli cos policzylismy to wypisujemy wynik
+        if(sscanf(line, "%s %s", arg1, arg2) == 2){ /*odczyt naglowka*/
+            if(result != NULL){ /*jeżeli cos policzylismy to wypisujemy wynik*/
                 fprintf(out, "\nWynik = %s\n\n", result);
                 free(result);
                 result = NULL;
@@ -114,7 +113,7 @@ void processFile(FILE *in, FILE *out){
                 continue;
             }
 
-            // ustawienie parametrów działania
+            /*ustawienie parametrów działania*/
             if(!(arg1[0] == '+' || arg1[0] == '^' || arg1[0] == '%' || arg1[0] == '/' || arg1[0] == '*')){
                 sIn = atoi(arg1);
                 opFlag = 2;
@@ -124,7 +123,6 @@ void processFile(FILE *in, FILE *out){
                 opFlag = 1;
             }
             sOut = atoi(arg2);
-            printf("%i\n", sOut);
             if(opFlag == 1) fprintf(out, "%c %i\n\n", operation, sOut);
             else fprintf(out, "%i %i\n\n", sIn, sOut);
             
@@ -133,12 +131,12 @@ void processFile(FILE *in, FILE *out){
         strcpy(argument, line);
         argument[argLen - 1] = '\0';
 
-        if(opFlag == -1){ //DLa liczby nie zadeklarowano poprawnie rodzaju dzialania
+        if(opFlag == -1){ /*DLa liczby nie zadeklarowano poprawnie rodzaju dzialania*/
             fprintf(out, "Dla liczby nie zdefiniowano dzialania\n");
             continue;
         }
         
-        if(opFlag == 1){ // dzialanie arytmetyczne
+        if(opFlag == 1){ /*dzialanie arytmetyczne*/
             if(!checkBase(argument,sOut)){
                 fprintf(out,"'%s' nie jest liczba w systemie %i\n", argument, sOut);
                 continue;
@@ -146,7 +144,7 @@ void processFile(FILE *in, FILE *out){
             
             removeZero(argument);
             fprintf(out, "%s\n", argument);
-            if(result == NULL){ // wtedy pierwszy argument dzialania
+            if(result == NULL){ /*wtedy pierwszy argument dzialania*/
                 result = realloc(result, (strlen(argument) + 1) * sizeof(char));
                 if(result == NULL){
                 fprintf(stderr, "Blad alokacji pamieci");
@@ -155,7 +153,7 @@ void processFile(FILE *in, FILE *out){
                 strcpy(result,argument);
                 continue;
             }
-            //wybor dzialania
+            /*wybor dzialania*/
             switch (operation)
             {
                 case '+':
@@ -180,12 +178,11 @@ void processFile(FILE *in, FILE *out){
                 default:
                     fprintf(out,"Not meant to end up here\n");
                 }
-            //wynik jako poprzedni wynik (działanie) kolejny argument
-            result = realloc(newResult, (strlen(newResult) + 1) * sizeof(char)); 
-            
+            /*wynik jako poprzedni wynik (działanie) kolejny argument*/
+            result = realloc(newResult, (strlen(newResult) + 1) * sizeof(char));
         }
         
-        //zmiana systemow
+        /*zmiana systemow*/
         if(opFlag == 2){
             if(checkBase(argument, sIn)) fprintf(out, "%s\n", argument);
             else{
@@ -203,7 +200,7 @@ void processFile(FILE *in, FILE *out){
 }
 
 
-char *createOutName(char *in){ //tworzenie nazwy pliku wyjsciowego
+char *createOutName(char *in){ /*tworzenie nazwy pliku wyjsciowego*/
     char *result = malloc(strlen(in) + 6);
     if(result == NULL){
         fprintf(stderr, "Blad alokacji pamieci");
