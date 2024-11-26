@@ -244,6 +244,11 @@ char *division(char* a, char *b, int base){
 }
 
 char *modulo(char *a, char *b, int base){
+    char *result = malloc(3 * sizeof(char));
+    if(b[0] == '0') {
+        result = str_duplicate("1");
+        return result;
+    }
     return subtraction(a,multiplication(b,division(a,b,base),base),base); 
 }
 
@@ -354,6 +359,7 @@ char *systemChange(char *a, int bIn, int bOut) {
 }
 
 char *power(char *base, char *exponent, int systemBase) {
+    
     char *result = malloc(2 * sizeof(char));
     if(result == NULL){
         fprintf(stderr, "Blad alokacji pamieci");

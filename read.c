@@ -41,7 +41,6 @@ void processFile(FILE *in, FILE *out){
     int sIn;
     int sOut;
     char operation;
-
     int opFlag = -1; //flaga operacji
     int argLen = 0;
     int emptyCounter = 0;
@@ -89,12 +88,14 @@ void processFile(FILE *in, FILE *out){
 
     while (fgets(line, MAX_L, in) != NULL){
         argLen = strlen(line);
-
+        
         if(argLen <= 1){    // gdy linia jest pusta
             emptyCounter += 1;
             if(emptyCounter == 3 && result != NULL){    // po trzech pustych koniec działania
                 fprintf(out, "\nWynik = %s\n\n", result);
-                //free(result);
+                printf("%s\n", result);
+                free(result);
+                result = malloc(2 *sizeof(char));
                 result = NULL;
             }
             continue;
@@ -112,6 +113,8 @@ void processFile(FILE *in, FILE *out){
                 opFlag = -1;
                 continue;
             }
+
+            // ustawienie parametrów działania
             if(!(arg1[0] == '+' || arg1[0] == '^' || arg1[0] == '%' || arg1[0] == '/' || arg1[0] == '*')){
                 sIn = atoi(arg1);
                 opFlag = 2;
@@ -121,6 +124,7 @@ void processFile(FILE *in, FILE *out){
                 opFlag = 1;
             }
             sOut = atoi(arg2);
+            printf("%i\n", sOut);
             if(opFlag == 1) fprintf(out, "%c %i\n\n", operation, sOut);
             else fprintf(out, "%i %i\n\n", sIn, sOut);
             
@@ -128,12 +132,13 @@ void processFile(FILE *in, FILE *out){
         }
         strcpy(argument, line);
         argument[argLen - 1] = '\0';
-        if(opFlag == -1){
+
+        if(opFlag == -1){ //DLa liczby nie zadeklarowano poprawnie rodzaju dzialania
             fprintf(out, "Dla liczby nie zdefiniowano dzialania\n");
             continue;
         }
         
-        if(opFlag == 1){
+        if(opFlag == 1){ // dzialanie arytmetyczne
             if(!checkBase(argument,sOut)){
                 fprintf(out,"'%s' nie jest liczba w systemie %i\n", argument, sOut);
                 continue;
@@ -141,7 +146,7 @@ void processFile(FILE *in, FILE *out){
             
             removeZero(argument);
             fprintf(out, "%s\n", argument);
-            if(result == NULL){
+            if(result == NULL){ // wtedy pierwszy argument dzialania
                 result = realloc(result, (strlen(argument) + 1) * sizeof(char));
                 if(result == NULL){
                 fprintf(stderr, "Blad alokacji pamieci");
@@ -150,7 +155,7 @@ void processFile(FILE *in, FILE *out){
                 strcpy(result,argument);
                 continue;
             }
-            
+            //wybor dzialania
             switch (operation)
             {
                 case '+':
@@ -175,13 +180,12 @@ void processFile(FILE *in, FILE *out){
                 default:
                     fprintf(out,"Not meant to end up here\n");
                 }
-            
-            free(result);
-            result = newResult;
+            //wynik jako poprzedni wynik (działanie) kolejny argument
+            result = realloc(newResult, (strlen(newResult) + 1) * sizeof(char)); 
             
         }
         
-        
+        //zmiana systemow
         if(opFlag == 2){
             if(checkBase(argument, sIn)) fprintf(out, "%s\n", argument);
             else{
@@ -189,6 +193,7 @@ void processFile(FILE *in, FILE *out){
                 continue;
             }
             removeZero(argument);
+           
             result = systemChange(argument, sIn, sOut);
             fprintf(out,"\nWynik: %s\n\n", result);
             free(result);
