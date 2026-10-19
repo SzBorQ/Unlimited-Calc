@@ -1,0 +1,9 @@
+# Build artifacts
+bin/
+build/
+*.o
+out_*.txt
+
+# IDE
+.idea/
+*.user
